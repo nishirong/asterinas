@@ -15,6 +15,7 @@ use crate::{
     user::UserSpace,
     vm::{page_table::KERNEL_PAGE_TABLE, VmAllocOptions, VmSegment, PAGE_SIZE},
 };
+use core::mem::size_of;
 
 pub const KERNEL_STACK_SIZE: usize = PAGE_SIZE * 64;
 
@@ -278,7 +279,7 @@ impl TaskOptions {
         result.task_inner.lock().task_status = TaskStatus::Runnable;
         result.task_inner.lock().ctx.rip = kernel_task_entry as usize;
         result.task_inner.lock().ctx.regs.rsp =
-            (crate::vm::paddr_to_vaddr(result.kstack.end_paddr())) as u64;
+            (crate::vm::paddr_to_vaddr(result.kstack.end_paddr() - size_of::<u64> as usize)) as u64;
 
         Ok(Arc::new(result))
     }
@@ -315,7 +316,7 @@ impl TaskOptions {
         result.task_inner.lock().task_status = TaskStatus::Runnable;
         result.task_inner.lock().ctx.rip = kernel_task_entry as usize;
         result.task_inner.lock().ctx.regs.rsp =
-            (crate::vm::paddr_to_vaddr(result.kstack.end_paddr())) as u64;
+            (crate::vm::paddr_to_vaddr(result.kstack.end_paddr() - size_of::<u64> as usize)) as u64;
 
         let arc_self = Arc::new(result);
         arc_self.run();
